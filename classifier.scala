@@ -51,17 +51,33 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       sumOfL2Gradients += L2Column(gradients)
     }
     val avgOfL2Gradients:Float = sumOfL2Gradients / xTraining.size
+    var fp:Float = 0.0f; var tp:Float = 0.0f; var fn:Float = 0.0f; var tn:Float = 0.0f; 
     var sumOfBlockAvgError:Float = 0.0f
     for ( blockNum <- 0 to xTest.size-1 ) {
       val X:SMat = xTest(blockNum)
       val Y:FMat = full(yTest(blockNum))
       sumOfBlockAvgError += blockAvgError(X, Y)
+      //calculations for precision and recall
+      val combo:FMat = X Tmult(WEIGHTS, null)
+      val ourPos:FMat = combo > 2.5
+      val yPos:FMat = Y > 2.5
+      tp += sum(ourPos *@ yPos, 1)(0,0)
+      tn += combo.nrows - sum( (ourPos + yPos) > 0, 1 )(0,0)
+      fp += sum((ourPos - yPos) > 0, 1)(0,0)
+      fn += sum((ourPos - yPos) < 0, 1)(0,0)
     }
     val avgOfSumOfBlockAvgError:Float = sumOfBlockAvgError / xTest.size
+    val precision:Float = tp / (tp + fp)
+    val recall:Float = tp / (tp + fn)
+    val accuracy:Float = (tp + tn) / (tp + fp + tn + fn)
+    val F1:Float = (2*precision*recall) / (precision + recall)
     println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     println("Iteration: " + iters)
     println("Average of the error from each block: " + avgOfSumOfBlockAvgError)
     println("Average of the L2 of the gradients from each block: " + avgOfL2Gradients)
+    println("Precision: " + precision)
+    println("Recall: " + accuracy)
+    println("F1: " + F1)
     println("====================================================================")
     iters += 1
   }

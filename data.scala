@@ -47,9 +47,10 @@ object processData {
       }
       if ( ratingFlag ) {
         //add to y's reviewNumber is row, column is 0, value is label
-        currentYBlockRows += reviewNumber
+        currentYBlockRows += reviewNumber % 10000
         currentYBlockCols += 0
         currentYBlockVals += ratingConverter(words(tokenIndex))
+        println("Y("+reviewNumber%10000+","+0+") = "+ratingConverter(words(tokenIndex)))
         ratingFlag = false
       }
       if ( words(tokenIndex) == "<rating>" ) { ratingFlag = true }
@@ -81,12 +82,5 @@ object processData {
         }
       }
     }
-    println("Saving Last Block")
-    saveAs("mats/XYLast",
-	   sparse(icol(currentXBlockRows.toList), icol(currentXBlockCols.toList), col(currentXBlockVals.toList), 100000, 10000),
-	   "X",
-	   sparse(icol(currentYBlockRows.toList), icol(currentYBlockCols.toList), col(currentYBlockVals.toList), 10000, 1),
-	   "Y")
-
   }
 }

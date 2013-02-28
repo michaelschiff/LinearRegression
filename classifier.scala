@@ -75,8 +75,8 @@ object run {
       xTraining += load("mats/XY"+i, "X")
       yTraining += load("mats/XY"+i, "Y")
     }
-    xTraining += load("mats/XYLast", "X")
-    yTraining += load("mats/XYLast", "Y")
+    //xTraining += load("mats/XYLast", "X")
+    //yTraining += load("mats/XYLast", "Y")
 
     //pull out 9 corresponding blocks of X and Y to act as hold out
     val xTest:ArrayBuffer[SMat] = new ArrayBuffer()

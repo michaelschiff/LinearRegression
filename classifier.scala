@@ -44,7 +44,6 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     var sumOfL2Gradients:Float = 0.0f
     println(xTraining.size + " " + yTraining.size)
     for ( blockNum <- 0 to xTraining.size-1 ) {
-      println( blockNum )
       val X:SMat = xTraining(blockNum)
       val Y:FMat = full(yTraining(blockNum))
       val gradients:FMat = blockGradient(X, Y)

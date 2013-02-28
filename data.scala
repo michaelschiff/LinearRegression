@@ -50,7 +50,6 @@ object processData {
         currentYBlockRows += reviewNumber % 10000
         currentYBlockCols += 0
         currentYBlockVals += ratingConverter(words(tokenIndex))
-        println("Y("+reviewNumber%10000+","+0+") = "+ratingConverter(words(tokenIndex)))
         ratingFlag = false
       }
       if ( words(tokenIndex) == "<rating>" ) { ratingFlag = true }

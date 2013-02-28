@@ -7,6 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.math
 import scala.util.Random
   
+run.woodshed()
 run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat]) {
@@ -88,5 +89,19 @@ object run {
     
     //initialize and train classifier
     val c = new classifier(xTraining, yTraining, xTest, yTest)
+  }
+  def woodshed() = {
+    val xTrain:ArrayBuffer[SMat] = new ArrayBuffer(sparse(1 on 0 on 0), 
+                                                   sparse(2 on 0 on 0),
+                                                   sparse(3 on 0 on 0),
+                                                   sparse(4 on 0 on 0),
+                                                   sparse(5 on 0 on 0), 
+                                                   sparse(6 on 0 on 0), 
+                                                   sparse(7 on 0 on 0), 
+                                                   sparse(8 on 0 on 0))
+    val yTrain:ArrayBuffer[FMat] = new ArrayBuffer(col(1), col(2), col(3), col(4), col(5), col(6), col(7), col(8))
+    val xTest:ArrayBuffer[SMat] = new ArrayBuffer(sparse(9 on 0 on 0), sparse(10 on 0 on 0))
+    val yTest:ArrayBuffer[FMat] = new ArrayBuffer(col(9), col(10))
+    val c = new classifier(xTrain, yTrain, xTest, yTest)
   }
 }

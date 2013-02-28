@@ -78,6 +78,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("Precision: " + precision)
     println("Recall: " + accuracy)
     println("F1: " + F1)
+    println("Accuracy: " + accuracy)
     println("====================================================================")
     iters += 1
   }

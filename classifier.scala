@@ -25,7 +25,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     if ( xTest(i).ncols != yTest(i).nrows ) { println(i + "th block of test X and Y dimension mismatch") }
   }
   def sign(x:FMat): FMat = ((2 * (x >= 0) - 1)+(2 * (x > 0) -1))/@2
-  def L2Column(x:FMat): FLoat = math.sqrt(sum(abs(x)*@abs(x), 1))
+  def L2Column(x:FMat): Float = math.sqrt(sum(abs(x)*@abs(x), 1)(0,0))
   def blockGradient(X:SMat, Y:FMat):FMat = {
     if ( X.ncols != Y.nrows ) { println("ERROR: block dimensions to not match") }
     val combo = X Tmult(WEIGHTS, null) //X is sparse w is a COLUMN!!!
@@ -39,6 +39,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val e = X.Tmult(WEIGHTS, null) - Y
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
+  var iters:Int = 0
   while( true ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     var sumOfL2Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
@@ -48,7 +49,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       WEIGHTS -= (gradients * ALPHA) + (LAMBDA * sign(WEIGHTS)) //additive term is for Lasso Reg.
       sumOfL2Gradients += L2Column(gradients)
     }
-    val avgOfL2Gradients:FLoat = sumOfL2Gradients / xTraining.size
+    val avgOfL2Gradients:Float = sumOfL2Gradients / xTraining.size
     var sumOfBlockAvgError:Float = 0.0f
     for ( blockNum <- 0 to xTest.size-1 ) {
       val X:SMat = xTest(blockNum)
@@ -61,6 +62,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("Average of the error from each block: " + avgOfSumOfBlockAvgError)
     println("Average of the L2 of the gradients from each block: " + avgOfL2Gradients)
     println("====================================================================")
+    iters += 1
   }
 }
 object run {
@@ -75,16 +77,16 @@ object run {
     yTraining += load("mats/XYLast", "Y")
 
     //pull out 9 corresponding blocks of X and Y to act as hold out
-    xTest:ArrayBuffer[SMat] = new ArrayBuffer()
-    yTest:ArrayBuffer[Smat] = new ArrayBuffer()
+    val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
+    val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
     for ( i <- 1 to 9 ) {
       val rng = new Random()
       val randomBlockNumber = rng.nextInt(xTraining.size)
       xTest += xTraining.remove(randomBlockNumber)
-      ytest += yTraining.remove(randomBlockNumber)
+      yTest += yTraining.remove(randomBlockNumber)
     }
     
     //initialize and train classifier
-    val classifier = new classifer(xTraining, yTraining, xTest, yTest)
+    val c = new classifier(xTraining, yTraining, xTest, yTest)
   }
 }

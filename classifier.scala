@@ -63,7 +63,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("====================================================================")
   }
 }
-object run() {
+object run {
   def main() = {
     val xTraining:ArrayBuffer[SMat] = new ArrayBuffer()
     val yTraining:ArrayBuffer[SMat] = new ArrayBuffer()

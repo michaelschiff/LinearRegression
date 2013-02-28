@@ -60,7 +60,7 @@ object processData {
         currentReviewWordCounts.foreach( kv => currentReviewWordCounts(kv._1) = kv._2 / totalNumWords )
         for ( kv <- currentReviewWordCounts.toList ) {
           currentXBlockRows += kv._1
-          currentXBlockCols += reviewNumber
+          currentXBlockCols += reviewNumber % 10000
           currentXBlockVals += kv._2
         }
         currentReviewWordCounts = Map[Int,Float]() //this collection is reset for EVERY REVIEW

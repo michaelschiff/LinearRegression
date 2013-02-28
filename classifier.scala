@@ -7,14 +7,14 @@ import scala.collection.mutable.ArrayBuffer
 import scala.math
 import scala.util.Random
   
-run.woodshed()
+//run.woodshed()
 run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat]) {
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
-  var ALPHA:Float = 1.0f
-  var LAMBDA:Float = 0.1f
+  var ALPHA:Float = 0.1f //0.0000000001f good alpha for watching the woodshed test descend
+  var LAMBDA:Float = 0.0f
   if ( xTraining.size != yTraining.size ) { println("# training examples and # training labels do not match") }
   if ( xTest.size != yTest.size ) { println("# test examples and # test labels do not match") }
   for ( i <- 0 to xTraining.size-1 ) {
@@ -91,17 +91,30 @@ object run {
     val c = new classifier(xTraining, yTraining, xTest, yTest)
   }
   def woodshed() = {
-    val xTrain:ArrayBuffer[SMat] = new ArrayBuffer(sparse(1 on 0 on 0), 
-                                                   sparse(2 on 0 on 0),
-                                                   sparse(3 on 0 on 0),
-                                                   sparse(4 on 0 on 0),
-                                                   sparse(5 on 0 on 0), 
-                                                   sparse(6 on 0 on 0), 
-                                                   sparse(7 on 0 on 0), 
-                                                   sparse(8 on 0 on 0))
-    val yTrain:ArrayBuffer[FMat] = new ArrayBuffer(col(1), col(2), col(3), col(4), col(5), col(6), col(7), col(8))
-    val xTest:ArrayBuffer[SMat] = new ArrayBuffer(sparse(9 on 0 on 0), sparse(10 on 0 on 0))
-    val yTest:ArrayBuffer[FMat] = new ArrayBuffer(col(9), col(10))
+    val xTrain:ArrayBuffer[SMat] = new ArrayBuffer()
+    xTrain += sparse(1 on 0 on 0)
+    xTrain += sparse(2 on 0 on 0)
+    xTrain += sparse(3 on 0 on 0)
+    xTrain += sparse(4 on 0 on 0)
+    xTrain += sparse(5 on 0 on 0)
+    xTrain += sparse(6 on 0 on 0)
+    xTrain += sparse(7 on 0 on 0)
+    xTrain += sparse(8 on 0 on 0)
+    val yTrain:ArrayBuffer[SMat] = new ArrayBuffer()
+    yTrain += sparse(col(1))
+    yTrain += sparse(col(2))
+    yTrain += sparse(col(3))
+    yTrain += sparse(col(4))
+    yTrain += sparse(col(5))
+    yTrain += sparse(col(6))
+    yTrain += sparse(col(7))
+    yTrain += sparse(col(8))
+    val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
+    xTest += sparse(9 on 0 on 0)
+    xTest += sparse(10 on 0 on 0)
+    val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
+    yTest += sparse(col(9))
+    yTest += sparse(col(10))
     val c = new classifier(xTrain, yTrain, xTest, yTest)
   }
 }

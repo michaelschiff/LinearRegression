@@ -25,7 +25,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     if ( xTest(i).ncols != yTest(i).nrows ) { println(i + "th block of test X and Y dimension mismatch") }
   }
   def sign(x:FMat): FMat = ((2 * (x >= 0) - 1)+(2 * (x > 0) -1))/@2
-  def L2Column(x:FMat): Float = math.sqrt(sum(abs(x)*@abs(x), 1)(0,0))
+  def L2Column(x:FMat): Float = math.sqrt(sum(abs(x)*@abs(x), 1)(0,0)).toFloat
   def blockGradient(X:SMat, Y:FMat):FMat = {
     if ( X.ncols != Y.nrows ) { println("ERROR: block dimensions to not match") }
     val combo = X Tmult(WEIGHTS, null) //X is sparse w is a COLUMN!!!
@@ -42,7 +42,9 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
   var iters:Int = 0
   while( true ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     var sumOfL2Gradients:Float = 0.0f
+    println(xTraining.size + " " + yTraining.size)
     for ( blockNum <- 0 to xTraining.size-1 ) {
+      println( blockNum )
       val X:SMat = xTraining(blockNum)
       val Y:FMat = full(yTraining(blockNum))
       val gradients:FMat = blockGradient(X, Y)

@@ -71,6 +71,8 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val recall:Float = tp / (tp + fn)
     val accuracy:Float = (tp + tn) / (tp + fp + tn + fn)
     val F1:Float = (2*precision*recall) / (precision + recall)
+    val sensitivity:Float = tp / ( tp + fn )
+    val specificity:Float = tn / ( fp + tn )
     println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     println("Iteration: " + iters)
     println("Average of the error from each block: " + avgOfSumOfBlockAvgError)
@@ -79,6 +81,8 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("Recall: " + accuracy)
     println("F1: " + F1)
     println("Accuracy: " + accuracy)
+    println("Sensitivity (tpr): " + sensitivity)
+    println("1 - Specificity (fpr): " + 1-specificity)
     println("====================================================================")
     iters += 1
   }

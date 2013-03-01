@@ -14,7 +14,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
   var ALPHA:Float = 0.1f //0.0000000001f good alpha for watching the woodshed test descend
-  var LAMBDA:Float = 0.01f
+  var LAMBDA:Float = 0.0003f
   if ( xTraining.size != yTraining.size ) { println("# training examples and # training labels do not match") }
   if ( xTest.size != yTest.size ) { println("# test examples and # test labels do not match") }
   for ( i <- 0 to xTraining.size-1 ) {
@@ -60,8 +60,8 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       sumOfBlockAvgError += blockAvgError(X, Y)
       //calculations for precision and recall
       val combo:FMat = X Tmult(WEIGHTS, null)
-      val ourPos:FMat = combo > 2.5
-      val yPos:FMat = Y > 2.5
+      val ourPos:FMat = combo >= 4
+      val yPos:FMat = Y >= 4
       tp += sum(ourPos *@ yPos, 1)(0,0)
       tn += combo.nrows - sum( (ourPos + yPos) > 0, 1 )(0,0)
       fp += sum((ourPos - yPos) > 0, 1)(0,0)

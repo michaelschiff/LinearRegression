@@ -11,6 +11,8 @@ import scala.util.Random
 run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat]) {
+  var myPlot:Plot = plot()
+  var myPlot2:Plot = plot()
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
   var ALPHA:Float = 0.1f //0.0000000001f good alpha for watching the woodshed test descend
@@ -75,6 +77,10 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val F1:Float = (2*precision*recall) / (precision + recall)
     val sensitivity:Float = tp / ( tp + fn )
     val specificity:Float = tn / ( fp + tn )
+    myPlot.addPoint(1, iters-1, sensitivity, true)
+    myPlot.addPoint(2, iters-1, 1-specificity, true)
+    myPlot2.addPoint(1, iters-1, avgOfSumOfBlockAvgError, true)
+    myPlot2.addPoint(2, iters-1, avgOfL1Gradients, true)
     println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     println("Iteration: " + iters)
     println("Average of the error from each block: " + avgOfSumOfBlockAvgError)

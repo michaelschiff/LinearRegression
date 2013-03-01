@@ -26,7 +26,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     if ( xTest(i).ncols != yTest(i).nrows ) { println(i + "th block of test X and Y dimension mismatch") }
   }
   def sign(x:FMat): FMat = ((2 * (x >= 0) - 1)+(2 * (x > 0) -1))/@2
-  def L2Column(x:FMat): Float = math.sqrt(sum(x*@x, 1)(0,0)).toFloat
+  def L1Column(x:FMat): Float = sum(abs(x), 1)(0,0)
   def blockGradient(X:SMat, Y:FMat):FMat = {
     if ( X.ncols != Y.nrows ) { println("ERROR: block dimensions to not match") }
     val combo = X Tmult(WEIGHTS, null) //X is sparse w is a COLUMN!!!
@@ -48,7 +48,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       val Y:FMat = full(yTraining(blockNum))
       val gradients:FMat = blockGradient(X, Y)
       WEIGHTS -= (gradients * ALPHA) + (LAMBDA * sign(WEIGHTS)) //additive term is for Lasso Reg.
-      sumOfL2Gradients += L2Column(gradients)
+      sumOfL2Gradients += L1Column(gradients)
     }
     val avgOfL2Gradients:Float = sumOfL2Gradients / xTraining.size
     var fp:Float = 0.0f; var tp:Float = 0.0f; var fn:Float = 0.0f; var tn:Float = 0.0f; 

@@ -74,7 +74,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     println("Iteration: " + iters)
     println("Average of the error from each block: " + avgOfSumOfBlockAvgError)
-    println("Average of the L2 of the gradients from each block: " + avgOfL1Gradients)
+    println("Average of the L1 norm of the gradients from each block: " + avgOfL1Gradients)
     println("Precision: " + precision)
     println("Recall: " + accuracy)
     println("F1: " + F1)

@@ -14,7 +14,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
   var ALPHA:Float = 0.1f //0.0000000001f good alpha for watching the woodshed test descend
-  var LAMBDA:Float = 0.00001f
+  var LAMBDA:Float = 0.01f
   if ( xTraining.size != yTraining.size ) { println("# training examples and # training labels do not match") }
   if ( xTest.size != yTest.size ) { println("# test examples and # test labels do not match") }
   for ( i <- 0 to xTraining.size-1 ) {
@@ -40,8 +40,9 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val e = X.Tmult(WEIGHTS, null) - Y
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
-  var iters:Int = 0
+  var iters:Int = 1
   while( true ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
+    //ALPHA = ALPHA * (1.0f / iters.toFloat)
     var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
       val X:SMat = xTraining(blockNum)
@@ -67,6 +68,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       fn += sum((ourPos - yPos) < 0, 1)(0,0)
     }
     val avgOfSumOfBlockAvgError:Float = sumOfBlockAvgError / xTest.size
+    if ( (tp+fp+tn+fn) != (10000*xTest.size) ) { println("Math Error") }
     val precision:Float = tp / (tp + fp)
     val recall:Float = tp / (tp + fn)
     val accuracy:Float = (tp + tn) / (tp + fp + tn + fn)
@@ -82,7 +84,12 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("F1: " + F1)
     println("Accuracy: " + accuracy)
     println("Sensitivity (tpr): " + sensitivity)
-    println("1 - Specificity (fpr): " + 1-specificity)
+    println("Specificity (tnr): " + specificity)
+    println("1 - Specificity (fpr): " + (1-specificity))
+    println("True Negatives: " + tn )
+    println("Total Negatives: " + (tn + fp))
+    println("True Positives: " + tp )
+    println("Total Positives: " + (tp + fn))
     println("====================================================================")
     iters += 1
   }

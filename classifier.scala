@@ -62,10 +62,10 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       val combo:FMat = X Tmult(WEIGHTS, null)
       val ourPos:FMat = combo >= 4
       val yPos:FMat = Y >= 4
-      tp += sum(ourPos *@ yPos, 1)(0,0)
-      tn += combo.nrows - sum( (ourPos + yPos) > 0, 1 )(0,0)
-      fp += sum((ourPos - yPos) > 0, 1)(0,0)
-      fn += sum((ourPos - yPos) < 0, 1)(0,0)
+      tn += sum(ourPos *@ yPos, 1)(0,0)
+      tp += combo.nrows - sum( (ourPos + yPos) > 0, 1 )(0,0)
+      fn += sum((ourPos - yPos) > 0, 1)(0,0)
+      fp += sum((ourPos - yPos) < 0, 1)(0,0)
     }
     val avgOfSumOfBlockAvgError:Float = sumOfBlockAvgError / xTest.size
     if ( (tp+fp+tn+fn) != (10000*xTest.size) ) { println("Math Error") }

@@ -42,15 +42,15 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
   }
   var iters:Int = 0
   while( true ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
-    var sumOfL2Gradients:Float = 0.0f
+    var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
       val X:SMat = xTraining(blockNum)
       val Y:FMat = full(yTraining(blockNum))
       val gradients:FMat = blockGradient(X, Y)
       WEIGHTS -= (gradients * ALPHA) + (LAMBDA * sign(WEIGHTS)) //additive term is for Lasso Reg.
-      sumOfL2Gradients += L1Column(gradients)
+      sumOfL1Gradients += L1Column(gradients)
     }
-    val avgOfL2Gradients:Float = sumOfL2Gradients / xTraining.size
+    val avgOfL1Gradients:Float = sumOfL1Gradients / xTraining.size
     var fp:Float = 0.0f; var tp:Float = 0.0f; var fn:Float = 0.0f; var tn:Float = 0.0f; 
     var sumOfBlockAvgError:Float = 0.0f
     for ( blockNum <- 0 to xTest.size-1 ) {
@@ -74,7 +74,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     println("Iteration: " + iters)
     println("Average of the error from each block: " + avgOfSumOfBlockAvgError)
-    println("Average of the L2 of the gradients from each block: " + avgOfL2Gradients)
+    println("Average of the L2 of the gradients from each block: " + avgOfL1Gradients)
     println("Precision: " + precision)
     println("Recall: " + accuracy)
     println("F1: " + F1)

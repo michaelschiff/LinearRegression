@@ -11,8 +11,8 @@ import scala.util.Random
 run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat]) {
-  var myPlot:Plot = plot()
-  var myPlot2:Plot = plot()
+  var myPlot = plot()
+  var myPlot2 = plot()
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
   var ALPHA:Float = 0.1f //0.0000000001f good alpha for watching the woodshed test descend

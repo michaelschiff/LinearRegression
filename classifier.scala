@@ -79,6 +79,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val specificity:Float = tn / ( fp + tn )
     myPlot.addPoint(0, iters-1, sensitivity, true)
     myPlot.addPoint(1, iters-1, 1-specificity, true)
+    myPlot2.addPoint(2, iters-1, specificity, true)
     myPlot2.addPoint(0, iters-1, avgOfSumOfBlockAvgError, true)
     myPlot2.addPoint(1, iters-1, avgOfL1Gradients, true)
     println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")

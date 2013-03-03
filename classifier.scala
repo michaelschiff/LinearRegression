@@ -11,8 +11,6 @@ import scala.util.Random
 run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat], THRESHOLD:Float) {
-  var roc = plot()
-  //var myPlot = plot()
   var myPlot2 = plot()
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
@@ -44,7 +42,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
   var iters:Int = 1
-  while( iters-1 < 5000 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
+  while( iters-1 < 10000 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     //ALPHA = ALPHA * (1.0f / iters.toFloat)
     var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
@@ -61,50 +59,19 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       val X:SMat = xTest(blockNum)
       val Y:FMat = full(yTest(blockNum))
       sumOfBlockAvgError += blockAvgError(X, Y)
-      //calculations for precision and recall
-      val combo:FMat = X Tmult(WEIGHTS, null)
-      val ourPos:FMat = combo >= 4
-      val yPos:FMat = Y >= 4
-      tp += sum(ourPos *@ yPos, 1)(0,0)
-      tn += combo.nrows - sum( (ourPos + yPos) > 0, 1 )(0,0)
-      fp += sum((ourPos - yPos) > 0, 1)(0,0)
-      fn += sum((ourPos - yPos) < 0, 1)(0,0)
     }
     val avgOfSumOfBlockAvgError:Float = sumOfBlockAvgError / xTest.size
-    if ( (tp+fp+tn+fn) != (10000*xTest.size) ) { println("Math Error") }
-    val precision:Float = tp / (tp + fp)
-    val recall:Float = tp / (tp + fn)
-    val accuracy:Float = (tp + tn) / (tp + fp + tn + fn)
-    val F1:Float = (2*precision*recall) / (precision + recall)
-    val sensitivity:Float = tp / ( tp + fn )
-    val specificity:Float = tn / ( fp + tn )
-    roc.addPoint(0, 1-specificity, sensitivity, true)
-    //myPlot.addPoint(0, iters-1, sensitivity, true)
-    //myPlot.addPoint(1, iters-1, 1-specificity, true)
-    //myPlot.addPoint(2, iters-1, specificity, true)
     myPlot2.addPoint(0, iters-1, avgOfSumOfBlockAvgError, true)
     myPlot2.addPoint(1, iters-1, avgOfL1Gradients, true)
     println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     println("Iteration: " + iters)
     println("Average of the error from each block: " + avgOfSumOfBlockAvgError)
     println("Average of the L1 norm of the gradients from each block: " + avgOfL1Gradients)
-    println("Precision: " + precision)
-    println("Recall: " + accuracy)
-    println("F1: " + F1)
-    println("Accuracy: " + accuracy)
-    println("Sensitivity (tpr): " + sensitivity)
-    println("Specificity (tnr): " + specificity)
-    println("1 - Specificity (fpr): " + (1-specificity))
-    println("True Negatives: " + tn )
-    println("Total Negatives: " + (tn + fp))
-    println("True Positives: " + tp )
-    println("Total Positives: " + (tp + fn))
     println("====================================================================")
     iters += 1
   }
   def plotROCS() = {
     val p = plot()
-    //p.addPoint(0,0,0,true)
     for ( q <- 2 to 5 ) {
       var tp = 0.0f; var fp = 0.0f; var tn = 0.0f; var fn = 0.0f
       for ( blockNum <- 0 to xTest.size-1 ) {
@@ -123,7 +90,6 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       val specificity:Float = tn / ( fp + tn )
       p.addPoint(0, 1-specificity, sensitivity, true)
     }
-    //p.addPoint(0,1,1,true)
   }
 }
 
@@ -135,7 +101,8 @@ object run {
       xTraining += load("mats/XY"+i, "X")
       yTraining += load("mats/XY"+i, "Y")
     }
-
+    
+    //DO THIS WHOLE THING 10 times, collecting an AUC score fore each one, then average those together
     //pull out 9 corresponding blocks of X and Y to act as hold out
     val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
     val yTest:ArrayBuffer[SMat] = new ArrayBuffer()

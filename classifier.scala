@@ -92,7 +92,6 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       p.addPoint(0, 1-specificity, sensitivity, true)
       points = (1-specificity, sensitivity) :: points
     }
-    points = points.reverse
     var auc:Float = 0.0f
     for ( p <- 0 to 2 ) {
       val x1:Float = points(p)._1; val y1:Float = points(p)._2

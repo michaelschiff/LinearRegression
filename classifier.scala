@@ -7,8 +7,8 @@ import scala.collection.mutable.ArrayBuffer
 import scala.math
 import scala.util.Random
   
-//run.woodshed()
-run.main()
+run.woodshed()
+//run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat], THRESHOLD:Float) {
   var roc = plot()
@@ -35,7 +35,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val combo = X Tmult(WEIGHTS, null) //X is sparse w is a COLUMN!!!
     val diff = combo - Y
     val twice_diff = diff * 2.0f
-    var gs = X * twice_diff
+    var gs = X.t Tmult(twice_diff, null)//var gs = X * twice_diff
     gs = gs /@ X.ncols
     return gs
   } 

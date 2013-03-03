@@ -43,7 +43,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
   var iters:Int = 1
-  val avgOfL1Gradients:Float = 1.0f
+  var avgOfL1Gradients:Float = 1.0f
   var fp:Float = 0.0f; var tp:Float = 0.0f; var fn:Float = 0.0f; var tn:Float = 0.0f; 
   while( avgOfL1Gradients > THRESHOLD ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     //ALPHA = ALPHA * (1.0f / iters.toFloat)
@@ -102,7 +102,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("====================================================================")
     iters += 1
   }
-  def getRates(): Tuple[Float, Float, Float, Float] = (tp, fp, tn, fn)
+  def getRates():Tuple4[Float, Float, Float, Float] = (tp, fp, tn, fn)
 }
 object run {
   def main() = {
@@ -127,7 +127,7 @@ object run {
       //initialize and train classifier, retrieve evaluations
       val c = new classifier(xTraining, yTraining, xTest, yTest, 0.00001f)
       var rates = c.getRates()
-      tp += rates._1; fp += rates._2; tn += rates._3, fn += rates._4
+      tp += rates._1; fp += rates._2; tn += rates._3; fn += rates._4
       //restore training examples
       xTraining ++ xTest
       yTraining ++ yTest
@@ -162,6 +162,6 @@ object run {
     val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
     yTest += sparse(col(9))
     yTest += sparse(col(10))
-    val c = new classifier(xTrain, yTrain, xTest, yTest)
+    val c = new classifier(xTrain, yTrain, xTest, yTest, 0.0000001f)
   }
 }

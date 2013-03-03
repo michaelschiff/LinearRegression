@@ -11,7 +11,7 @@ import scala.util.Random
 run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat], THRESHOLD:Float) {
-  //var roc = plot()
+  var roc = plot()
   //var myPlot = plot()
   var myPlot2 = plot()
   var numFeatures:Int = xTraining(0).nrows
@@ -44,7 +44,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
   var iters:Int = 1
-  while( iters-1 < 1000 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
+  while( iters-1 < 5000 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     //ALPHA = ALPHA * (1.0f / iters.toFloat)
     var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
@@ -78,7 +78,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val F1:Float = (2*precision*recall) / (precision + recall)
     val sensitivity:Float = tp / ( tp + fn )
     val specificity:Float = tn / ( fp + tn )
-    //roc.addPoint(0, 1-specificity, sensitivity, true)
+    roc.addPoint(0, 1-specificity, sensitivity, true)
     //myPlot.addPoint(0, iters-1, sensitivity, true)
     //myPlot.addPoint(1, iters-1, 1-specificity, true)
     //myPlot.addPoint(2, iters-1, specificity, true)
@@ -104,8 +104,8 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
   }
   def plotROCS() = {
     val p = plot()
-    p.addPoint(0,0,0,true)
-    for ( q <- 1 to 5 ) {
+    //p.addPoint(0,0,0,true)
+    for ( q <- 2 to 5 ) {
       var tp = 0.0f; var fp = 0.0f; var tn = 0.0f; var fn = 0.0f
       for ( blockNum <- 0 to xTest.size-1 ) {
         val X:SMat = xTest(blockNum)
@@ -121,9 +121,9 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       }
       val sensitivity:Float = tp / ( tp + fn )
       val specificity:Float = tn / ( fp + tn )
-      p.plot(0, 1-specificity, sensitivity, true)
+      p.addPoint(0, 1-specificity, sensitivity, true)
     }
-    p.addPoint(0,1,1,true)
+    //p.addPoint(0,1,1,true)
   }
 }
 
@@ -148,6 +148,7 @@ object run {
     //initialize and train classifier, retrieve evaluations
     val c = new classifier(xTraining, yTraining, xTest, yTest, 0.00001f)
     c.plotROCS
+    println("finished")
   }
   def woodshed() = {
     val xTrain:ArrayBuffer[SMat] = new ArrayBuffer()

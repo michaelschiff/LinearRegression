@@ -7,8 +7,8 @@ import scala.collection.mutable.ArrayBuffer
 import scala.math
 import scala.util.Random
   
-run.woodshed()
-//run.main()
+//run.woodshed()
+run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat], THRESHOLD:Float) {
   var roc = plot()
@@ -16,7 +16,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
   var myPlot2 = plot()
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
-  var ALPHA:Float = 0.1f //0.0000000001f good alpha for watching the woodshed test descend
+  var ALPHA:Float = 0.1f //0.0000000001f //good alpha for watching the woodshed test descend
   var LAMBDA:Float = 0.000000001f
   if ( xTraining.size != yTraining.size ) { println("# training examples and # training labels do not match") }
   if ( xTest.size != yTest.size ) { println("# test examples and # test labels do not match") }
@@ -35,7 +35,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val combo = X Tmult(WEIGHTS, null) //X is sparse w is a COLUMN!!!
     val diff = combo - Y
     val twice_diff = diff * 2.0f
-    var gs = X.t Tmult(twice_diff, null)//var gs = X * twice_diff
+    var gs = X * twice_diff //var gs = X.t Tmult(twice_diff, null)
     gs = gs /@ X.ncols
     return gs
   } 
@@ -65,8 +65,8 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       sumOfBlockAvgError += blockAvgError(X, Y)
       //calculations for precision and recall
       val combo:FMat = X Tmult(WEIGHTS, null)
-      val ourPos:FMat = combo >= 5
-      val yPos:FMat = Y >= 5
+      val ourPos:FMat = combo >= 4
+      val yPos:FMat = Y >= 4
       tp += sum(ourPos *@ yPos, 1)(0,0)
       tn += combo.nrows - sum( (ourPos + yPos) > 0, 1 )(0,0)
       fp += sum((ourPos - yPos) > 0, 1)(0,0)
@@ -133,6 +133,7 @@ object run {
       //restore training examples
       xTraining ++ xTest
       yTraining ++ yTest
+      println("completed fold " + j)
     }
     tp = tp / 10.0f; fp = fp / 10.0f; tn = tn / 10.0f; fn = fn / 10.0f
 
@@ -164,6 +165,6 @@ object run {
     val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
     yTest += sparse(col(9))
     yTest += sparse(col(10))
-    val c = new classifier(xTrain, yTrain, xTest, yTest, 0.0000001f)
+    val c = new classifier(xTrain, yTrain, xTest, yTest, 0.0001f)
   }
 }

@@ -105,7 +105,7 @@ object run {
     
     //DO THIS WHOLE THING 10 times, collecting an AUC score fore each one, then average those together
     var AUCS = 0.0f
-    for ( j <- 0 to 10 ) {
+    for ( j <- 1 to 10 ) {
       //pull out 9 corresponding blocks of X and Y to act as hold out
       val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
       val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
@@ -119,8 +119,8 @@ object run {
       val c = new classifier(xTraining, yTraining, xTest, yTest, 0.00001f)
       AUCS += c.plotROCS
       println("finished fold " + j)
-      xTraining ++ xTest
-      yTraining ++ yTest
+      xTraining ++= xTest
+      yTraining ++= yTest
     }
     AUCS = AUCS / 10.0f
     println("Average AUC: " + AUCS)

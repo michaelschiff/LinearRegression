@@ -10,7 +10,7 @@ import scala.util.Random
 //run.woodshed()
 run.main()
 
-class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat]) {
+class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat], THRESHOLD:Float) {
   var myPlot = plot()
   var myPlot2 = plot()
   var numFeatures:Int = xTraining(0).nrows
@@ -43,7 +43,9 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
   var iters:Int = 1
-  while( true ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
+  val avgOfL1Gradients:Float = 1.0f
+  var fp:Float = 0.0f; var tp:Float = 0.0f; var fn:Float = 0.0f; var tn:Float = 0.0f; 
+  while( avgOfL1Gradients > THRESHOLD ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     //ALPHA = ALPHA * (1.0f / iters.toFloat)
     var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
@@ -53,8 +55,8 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       WEIGHTS -= (gradients * ALPHA) + (LAMBDA * sign(WEIGHTS)) //additive term is for Lasso Reg.
       sumOfL1Gradients += L1Column(gradients)
     }
-    val avgOfL1Gradients:Float = sumOfL1Gradients / xTraining.size
-    var fp:Float = 0.0f; var tp:Float = 0.0f; var fn:Float = 0.0f; var tn:Float = 0.0f; 
+    avgOfL1Gradients = sumOfL1Gradients / xTraining.size
+    fp = 0.0f; tp = 0.0f; fn = 0.0f; tn = 0.0f; 
     var sumOfBlockAvgError:Float = 0.0f
     for ( blockNum <- 0 to xTest.size-1 ) {
       val X:SMat = xTest(blockNum)
@@ -100,6 +102,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("====================================================================")
     iters += 1
   }
+  def getRates(): Tuple[Float, Float, Float, Float] = (tp, fp, tn, fn)
 }
 object run {
   def main() = {
@@ -109,21 +112,30 @@ object run {
       xTraining += load("mats/XY"+i, "X")
       yTraining += load("mats/XY"+i, "Y")
     }
-    //xTraining += load("mats/XYLast", "X")
-    //yTraining += load("mats/XYLast", "Y")
 
-    //pull out 9 corresponding blocks of X and Y to act as hold out
-    val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
-    val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
-    for ( i <- 1 to 9 ) {
-      val rng = new Random()
-      val randomBlockNumber = rng.nextInt(xTraining.size)
-      xTest += xTraining.remove(randomBlockNumber)
-      yTest += yTraining.remove(randomBlockNumber)
+    var tp:Float = 0.0f; var fp:Float= 0.0f; var tn:Float= 0.0f; var fn:Float = 0.0f
+    for ( j <- 0 to 9 ) { 
+      //pull out 9 corresponding blocks of X and Y to act as hold out
+      val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
+      val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
+      for ( i <- 1 to 9 ) {
+        val rng = new Random()
+        val randomBlockNumber = rng.nextInt(xTraining.size)
+        xTest += xTraining.remove(randomBlockNumber)
+        yTest += yTraining.remove(randomBlockNumber)
+      }
+      //initialize and train classifier, retrieve evaluations
+      val c = new classifier(xTraining, yTraining, xTest, yTest, 0.00001f)
+      var rates = c.getRates()
+      tp += rates._1; fp += rates._2; tn += rates._3, fn += rates._4
+      //restore training examples
+      xTraining ++ xTest
+      yTraining ++ yTest
     }
+    tp = tp / 10.0f; fp = fp / 10.0f; tn = tn / 10.0f; fn = fn / 10.0f
+
+    //make a ROC plot with the averages
     
-    //initialize and train classifier
-    val c = new classifier(xTraining, yTraining, xTest, yTest)
   }
   def woodshed() = {
     val xTrain:ArrayBuffer[SMat] = new ArrayBuffer()

@@ -11,8 +11,8 @@ import scala.util.Random
 run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat], THRESHOLD:Float) {
-  var roc = plot()
-  var myPlot = plot()
+  //var roc = plot()
+  //var myPlot = plot()
   var myPlot2 = plot()
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
@@ -44,9 +44,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
   var iters:Int = 1
-  var avgOfL1Gradients:Float = 1.0f
-  var fp:Float = 0.0f; var tp:Float = 0.0f; var fn:Float = 0.0f; var tn:Float = 0.0f; 
-  while( avgOfL1Gradients > THRESHOLD ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
+  while( iters-1 < 1000 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     //ALPHA = ALPHA * (1.0f / iters.toFloat)
     var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
@@ -56,8 +54,8 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       WEIGHTS -= (gradients * ALPHA) + (LAMBDA * sign(WEIGHTS)) //additive term is for Lasso Reg.
       sumOfL1Gradients += L1Column(gradients)
     }
-    avgOfL1Gradients = sumOfL1Gradients / xTraining.size
-    fp = 0.0f; tp = 0.0f; fn = 0.0f; tn = 0.0f; 
+    val avgOfL1Gradients = sumOfL1Gradients / xTraining.size
+    var fp = 0.0f; var tp = 0.0f; var fn = 0.0f; var tn = 0.0f; 
     var sumOfBlockAvgError:Float = 0.0f
     for ( blockNum <- 0 to xTest.size-1 ) {
       val X:SMat = xTest(blockNum)
@@ -80,10 +78,10 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val F1:Float = (2*precision*recall) / (precision + recall)
     val sensitivity:Float = tp / ( tp + fn )
     val specificity:Float = tn / ( fp + tn )
-    roc.addPoint(0, 1-specificity, sensitivity, true)
-    myPlot.addPoint(0, iters-1, sensitivity, true)
-    myPlot.addPoint(1, iters-1, 1-specificity, true)
-    myPlot.addPoint(2, iters-1, specificity, true)
+    //roc.addPoint(0, 1-specificity, sensitivity, true)
+    //myPlot.addPoint(0, iters-1, sensitivity, true)
+    //myPlot.addPoint(1, iters-1, 1-specificity, true)
+    //myPlot.addPoint(2, iters-1, specificity, true)
     myPlot2.addPoint(0, iters-1, avgOfSumOfBlockAvgError, true)
     myPlot2.addPoint(1, iters-1, avgOfL1Gradients, true)
     println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
@@ -104,8 +102,31 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("====================================================================")
     iters += 1
   }
-  def getRates():Tuple4[Float, Float, Float, Float] = (tp, fp, tn, fn)
+  def plotROCS() = {
+    val p = plot()
+    p.addPoint(0,0,0,true)
+    for ( q <- 1 to 5 ) {
+      var tp = 0.0f; var fp = 0.0f; var tn = 0.0f; var fn = 0.0f
+      for ( blockNum <- 0 to xTest.size-1 ) {
+        val X:SMat = xTest(blockNum)
+        val Y:FMat = full(yTest(blockNum))
+        //calculations for precision and recall
+        val combo:FMat = X Tmult(WEIGHTS, null)
+        val ourPos:FMat = combo >= q
+        val yPos:FMat = Y >= q
+        tp += sum(ourPos *@ yPos, 1)(0,0)
+        tn += combo.nrows - sum( (ourPos + yPos) > 0, 1 )(0,0)
+        fp += sum((ourPos - yPos) > 0, 1)(0,0)
+        fn += sum((ourPos - yPos) < 0, 1)(0,0)
+      }
+      val sensitivity:Float = tp / ( tp + fn )
+      val specificity:Float = tn / ( fp + tn )
+      p.plot(0, 1-specificity, sensitivity, true)
+    }
+    p.addPoint(0,1,1,true)
+  }
 }
+
 object run {
   def main() = {
     val xTraining:ArrayBuffer[SMat] = new ArrayBuffer()
@@ -115,30 +136,18 @@ object run {
       yTraining += load("mats/XY"+i, "Y")
     }
 
-    var tp:Float = 0.0f; var fp:Float= 0.0f; var tn:Float= 0.0f; var fn:Float = 0.0f
-    for ( j <- 0 to 9 ) { 
-      //pull out 9 corresponding blocks of X and Y to act as hold out
-      val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
-      val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
-      for ( i <- 1 to 9 ) {
-        val rng = new Random()
-        val randomBlockNumber = rng.nextInt(xTraining.size)
-        xTest += xTraining.remove(randomBlockNumber)
-        yTest += yTraining.remove(randomBlockNumber)
-      }
-      //initialize and train classifier, retrieve evaluations
-      val c = new classifier(xTraining, yTraining, xTest, yTest, 0.00001f)
-      var rates = c.getRates()
-      tp += rates._1; fp += rates._2; tn += rates._3; fn += rates._4
-      //restore training examples
-      xTraining ++ xTest
-      yTraining ++ yTest
-      println("completed fold " + j)
+    //pull out 9 corresponding blocks of X and Y to act as hold out
+    val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
+    val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
+    for ( i <- 1 to 9 ) {
+      val rng = new Random()
+      val randomBlockNumber = rng.nextInt(xTraining.size)
+      xTest += xTraining.remove(randomBlockNumber)
+      yTest += yTraining.remove(randomBlockNumber)
     }
-    tp = tp / 10.0f; fp = fp / 10.0f; tn = tn / 10.0f; fn = fn / 10.0f
-
-    //make a ROC plot with the averages
-    
+    //initialize and train classifier, retrieve evaluations
+    val c = new classifier(xTraining, yTraining, xTest, yTest, 0.00001f)
+    c.plotROCS
   }
   def woodshed() = {
     val xTrain:ArrayBuffer[SMat] = new ArrayBuffer()

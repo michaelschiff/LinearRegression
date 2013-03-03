@@ -72,7 +72,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
   }
   def plotROCS():Float = {
     val p = plot()
-    val points:List[Tuple2[Float,Float]] = List()
+    var points:List[Tuple2[Float,Float]] = List()
     for ( q <- 2 to 5 ) {
       var tp = 0.0f; var fp = 0.0f; var tn = 0.0f; var fn = 0.0f
       for ( blockNum <- 0 to xTest.size-1 ) {
@@ -93,10 +93,10 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       (1-specificity, sensitivity) :: points
     }
     points = points.reverse
-    var auc:float = 0.0f
+    var auc:Float = 0.0f
     for ( p <- 0 to 2 ) {
-      val x:Float = points(p)._1; val y:Float = points(p)._2
-      val x2:Float = points(p+1)._1; val y:Float = points(p+1)._2
+      val x1:Float = points(p)._1; val y1:Float = points(p)._2
+      val x2:Float = points(p+1)._1; val y2:Float = points(p+1)._2
       auc += (y1 + y2)*(x2 - x1)*0.5f
     }
     return auc

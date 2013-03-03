@@ -90,7 +90,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       val sensitivity:Float = tp / ( tp + fn )
       val specificity:Float = tn / ( fp + tn )
       p.addPoint(0, 1-specificity, sensitivity, true)
-      (1-specificity, sensitivity) :: points
+      points = (1-specificity, sensitivity) :: points
     }
     points = points.reverse
     var auc:Float = 0.0f

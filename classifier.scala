@@ -42,7 +42,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
   var iters:Int = 1
-  while( iters-1 < 10000 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
+  while( iters-1 < 200 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     //ALPHA = ALPHA * (1.0f / iters.toFloat)
     var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
@@ -90,6 +90,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       val specificity:Float = tn / ( fp + tn )
       p.addPoint(0, 1-specificity, sensitivity, true)
     }
+    return 0.0f //This will be a calculat for the AUC for curve above
   }
 }
 
@@ -103,19 +104,26 @@ object run {
     }
     
     //DO THIS WHOLE THING 10 times, collecting an AUC score fore each one, then average those together
-    //pull out 9 corresponding blocks of X and Y to act as hold out
-    val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
-    val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
-    for ( i <- 1 to 9 ) {
-      val rng = new Random()
-      val randomBlockNumber = rng.nextInt(xTraining.size)
-      xTest += xTraining.remove(randomBlockNumber)
-      yTest += yTraining.remove(randomBlockNumber)
+    var AUCS = 0.0f
+    for ( j <- 0 to 10 ) {
+      //pull out 9 corresponding blocks of X and Y to act as hold out
+      val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
+      val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
+      for ( i <- 1 to 9 ) {
+        val rng = new Random(Scala.compat.Platform.currentTime)
+        val randomBlockNumber = rng.nextInt(xTraining.size)
+        xTest += xTraining.remove(randomBlockNumber)
+        yTest += yTraining.remove(randomBlockNumber)
+      }
+      //initialize and train classifier, retrieve evaluations
+      val c = new classifier(xTraining, yTraining, xTest, yTest, 0.00001f)
+      AUCS += c.plotROCS
+      println("finished fold " + j)
+      xTraining ++ xTest
+      yTraining ++ yTest
     }
-    //initialize and train classifier, retrieve evaluations
-    val c = new classifier(xTraining, yTraining, xTest, yTest, 0.00001f)
-    c.plotROCS
-    println("finished")
+    AUCS = AUCS / 10.0f
+    println("Average AUC: " + AUCS)
   }
   def woodshed() = {
     val xTrain:ArrayBuffer[SMat] = new ArrayBuffer()

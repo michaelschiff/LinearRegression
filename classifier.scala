@@ -42,7 +42,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
   var iters:Int = 1
-  while( iters-1 < 200 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
+  while( iters-1 < 10 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     //ALPHA = ALPHA * (1.0f / iters.toFloat)
     var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
@@ -70,7 +70,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     println("====================================================================")
     iters += 1
   }
-  def plotROCS() = {
+  def plotROCS():Float = {
     val p = plot()
     for ( q <- 2 to 5 ) {
       var tp = 0.0f; var fp = 0.0f; var tn = 0.0f; var fn = 0.0f
@@ -110,7 +110,7 @@ object run {
       val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
       val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
       for ( i <- 1 to 9 ) {
-        val rng = new Random(Scala.compat.Platform.currentTime)
+        val rng = new Random(scala.compat.Platform.currentTime)
         val randomBlockNumber = rng.nextInt(xTraining.size)
         xTest += xTraining.remove(randomBlockNumber)
         yTest += yTraining.remove(randomBlockNumber)

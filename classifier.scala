@@ -80,7 +80,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val F1:Float = (2*precision*recall) / (precision + recall)
     val sensitivity:Float = tp / ( tp + fn )
     val specificity:Float = tn / ( fp + tn )
-    roc.addPoint(0, 1-specificity, sensitivity)
+    roc.addPoint(0, 1-specificity, sensitivity, true)
     myPlot.addPoint(0, iters-1, sensitivity, true)
     myPlot.addPoint(1, iters-1, 1-specificity, true)
     myPlot.addPoint(2, iters-1, specificity, true)

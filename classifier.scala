@@ -15,7 +15,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
   var ALPHA:Float = 0.1f //0.0000000001f //good alpha for watching the woodshed test descend
-  var LAMBDA:Float = 0.000000001f
+  var LAMBDA:Float = 0.0001f
   if ( xTraining.size != yTraining.size ) { println("# training examples and # training labels do not match") }
   if ( xTest.size != yTest.size ) { println("# test examples and # test labels do not match") }
   for ( i <- 0 to xTraining.size-1 ) {
@@ -42,7 +42,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
   var iters:Int = 1
-  while( iters-1 < 100 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
+  while( iters-1 < 1000 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     //ALPHA = ALPHA * (1.0f / iters.toFloat)
     var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
@@ -119,6 +119,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
 
 object run {
   def main() = {
+    val folds = 1
     println("loading data")
     var words: CSMat = load("/scratch/HW2/tokenized.mat", "smap")
     //words = words(0 to 100000, 0)
@@ -132,7 +133,7 @@ object run {
     //DO THIS WHOLE THING 10 times, collecting an AUC score fore each one, then average those together
     println("starting 10 fold cross validation")
     var AUCS = 0.0f
-    for ( j <- 1 to 1 ) { //Do this process 10 times
+    for ( j <- 1 to folds ) { //Do this process 10 times
       //pull out 9 corresponding blocks of X and Y to act as hold out
       val xTest:ArrayBuffer[SMat] = new ArrayBuffer()
       val yTest:ArrayBuffer[SMat] = new ArrayBuffer()
@@ -158,7 +159,7 @@ object run {
       xTraining ++= xTest
       yTraining ++= yTest
     }
-    AUCS = AUCS / 10.0f
+    AUCS = AUCS / folds.toFloat
     println("Average AUC: " + AUCS)
   }
   def woodshed() = {

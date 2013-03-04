@@ -10,6 +10,7 @@ processData.main()
 
 object processData {
   def main() = {
+    var stopWords = List("to", "a", "of", "and", "the", "him", "her", "they")
     println("loading data...")
     var tokens: IMat = load("/scratch/HW2/tokenized.mat", "tokens")
     tokens = tokens.t(?, 2)
@@ -38,7 +39,7 @@ object processData {
 
     for ( iter:Int <- 0 to tokens.nrows-1 ) {
       val tokenIndex:Int = tokens(iter,0)-1 //indexes are 1 based in tokens
-      if ( reviewTextFlag && tokenIndex < 100000 ) {
+      if ( reviewTextFlag && tokenIndex < 100000 && !stopWords contains words(tokenIndex)) {
         if ( currentReviewWordCounts contains tokenIndex ) {
           currentReviewWordCounts(tokenIndex) += 1.0f
         } else {

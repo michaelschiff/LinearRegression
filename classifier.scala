@@ -4,7 +4,7 @@ import BIDMat.SciFunctions._
 import BIDMat.Solvers._
 import BIDMat.Plotting._
 import scala.collection.mutable.ArrayBuffer
-import scala.math
+//import scala.math._
 import scala.util.Random
   
 //run.woodshed()
@@ -97,21 +97,21 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return auc
   }
   def featureWeights():Tuple2[List[Tuple2[Int, Float]],List[Tuple2[Int,Float]]] = {
-    var p = new List[Tuple2[Int,Float]]()
-    var n = new List[Tuple2[Int,Float]]()
+    var p = List[Tuple2[Int,Float]]()
+    var n = List[Tuple2[Int,Float]]()
     var wcopy = FMat(WEIGHTS)
     for ( i <- 0 to 4 ) {
-      var mostPosVal = scala.math.NEG_INF_FLOAT; var mostPosIndex = 0
-      var mostNegVal = scala.math.POS_INF_FLoat; var mostNegIndex = 0
-      for ( j <- 0 to wcopy.nrow ) {
-        val v = copy(0,j)
+      var mostPosVal = Float.NegativeInfinity; var mostPosIndex = 0
+      var mostNegVal = Float.PositiveInfinity; var mostNegIndex = 0
+      for ( j <- 0 to wcopy.nrows-1 ) {
+        val v = wcopy(j,0)
         if ( v > mostPosVal ) { mostPosVal = v; mostPosIndex = j }
         if ( v < mostNegVal ) { mostNegVal = v; mostNegIndex = j }
       }
       p = (mostPosIndex, mostPosVal) :: p
       n = (mostNegIndex, mostNegVal) :: n
-      wcopy(0,mostPosIndex) = 0
-      wcopy(0,mostNegIndex) = 0
+      wcopy(mostPosIndex,0) = 0
+      wcopy(mostNegIndex,0) = 0
     }
     return (p, n)
   }
@@ -119,7 +119,9 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
 
 object run {
   def main() = {
-    val words: CSMat = load("/scratch/HW2/tokenized.mat", "smap")
+    println("loading data")
+    var words: CSMat = load("/scratch/HW2/tokenized.mat", "smap")
+    //words = words(0 to 100000, 0)
     val xTraining:ArrayBuffer[SMat] = new ArrayBuffer()
     val yTraining:ArrayBuffer[SMat] = new ArrayBuffer()
     for ( i <- 1 to 97 ) { //my data is broken up into 97 blocks, each block is 10K reviews
@@ -128,6 +130,7 @@ object run {
     }
     
     //DO THIS WHOLE THING 10 times, collecting an AUC score fore each one, then average those together
+    println("starting 10 fold cross validation")
     var AUCS = 0.0f
     for ( j <- 1 to 1 ) { //Do this process 10 times
       //pull out 9 corresponding blocks of X and Y to act as hold out

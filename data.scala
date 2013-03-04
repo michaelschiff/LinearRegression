@@ -39,7 +39,7 @@ object processData {
 
     for ( iter:Int <- 0 to tokens.nrows-1 ) {
       val tokenIndex:Int = tokens(iter,0)-1 //indexes are 1 based in tokens
-      if ( reviewTextFlag && tokenIndex < 100000 && !stopWords contains words(tokenIndex)) {
+      if ( reviewTextFlag && tokenIndex < 100000 && !(stopWords contains words(tokenIndex)) ) {
         if ( currentReviewWordCounts contains tokenIndex ) {
           currentReviewWordCounts(tokenIndex) += 1.0f
         } else {

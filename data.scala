@@ -57,7 +57,7 @@ object processData {
       if ( words(tokenIndex) == "<rating>" ) { ratingFlag = true }
       if ( words(tokenIndex) == "<review_text>" ) { reviewTextFlag = true }
       if ( words(tokenIndex) == "</review>" ) {
-        if ( currentReviewWords.values.size > 0 ) {
+        if ( currentReviewWordCounts.values.size > 0 ) {
           val totalNumWords:Float = currentReviewWordCounts.values.reduceLeft(_+_)
           currentReviewWordCounts.foreach( kv => currentReviewWordCounts(kv._1) = kv._2 / totalNumWords )
           for ( kv <- currentReviewWordCounts.toList ) {

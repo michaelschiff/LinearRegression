@@ -10,7 +10,7 @@ processData.main()
 
 object processData {
   def main() = {
-    var stopWords = List("to", "a", "of", "and", "the", "him", "her", "they", "that", "for", "is", "in", "it", "as", "with", "this", "you", "i", "are", "on", "his", "my", "an", "he", "she")
+    var stopWords:List[String] = List()//"to", "a", "of", "and", "the", "him", "her", "they", "that", "for", "is", "in", "it", "as", "with", "this", "you", "i", "are", "on", "his", "my", "an", "he", "she", "their", "who", "has", "by", "from", "or", "into", "at", "be", "all", "which", "well")
     println("loading data...")
     var tokens: IMat = load("/scratch/HW2/tokenized.mat", "tokens")
     tokens = tokens.t(?, 2)

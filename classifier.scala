@@ -11,11 +11,11 @@ import scala.util.Random
 run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat], THRESHOLD:Float) {
-  var myPlot2 = plot()
+  var myPlot2 = semilogx()
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
   var ALPHA:Float = 0.1f //0.0000000001f //good alpha for watching the woodshed test descend
-  var LAMBDA:Float = 0.0001f
+  var LAMBDA:Float = 0.0f
   if ( xTraining.size != yTraining.size ) { println("# training examples and # training labels do not match") }
   if ( xTest.size != yTest.size ) { println("# test examples and # test labels do not match") }
   for ( i <- 0 to xTraining.size-1 ) {
@@ -42,7 +42,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
   var iters:Int = 1
-  while( iters-1 < 500 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
+  while( iters-1 < 10000 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     //ALPHA = ALPHA * (1.0f / iters.toFloat)
     var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {

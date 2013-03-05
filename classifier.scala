@@ -14,7 +14,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
   var myPlot2 = semilogx()
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
-  var ALPHA:Float = 0.1f //0.0000000001f //good alpha for watching the woodshed test descend
+  var ALPHA:Float = 0.0001f //0.0000000001f //good alpha for watching the woodshed test descend
   var LAMBDA:Float = 0.0f
   if ( xTraining.size != yTraining.size ) { println("# training examples and # training labels do not match") }
   if ( xTest.size != yTest.size ) { println("# test examples and # test labels do not match") }
@@ -34,7 +34,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     val diff = combo - Y
     val twice_diff = diff * 2.0f
     var gs = X * twice_diff //var gs = X.t Tmult(twice_diff, null)
-    gs = gs /@ X.ncols
+    //gs = gs /@ X.ncols
     return gs
   } 
   def blockAvgError(X: SMat, Y:FMat): Float = { 
@@ -42,7 +42,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
     return sum(sqrt(e *@ e), 1)(0,0) / X.ncols
   }
   var iters:Int = 1
-  while( iters-1 < 10000 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
+  while( iters-1 < 100 ) { //classifier trains forever right now, ill add in a threshold if it looks like its converging
     //ALPHA = ALPHA * (1.0f / iters.toFloat)
     var sumOfL1Gradients:Float = 0.0f
     for ( blockNum <- 0 to xTraining.size-1 ) {
@@ -119,7 +119,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
 
 object run {
   def main() = {
-    val folds = 10
+    val folds = 1
     println("loading data")
     var words: CSMat = load("/scratch/HW2/tokenized.mat", "smap")
     //words = words(0 to 100000, 0)

@@ -11,7 +11,8 @@ import scala.util.Random
 run.main()
 
 class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest:ArrayBuffer[SMat], yTest:ArrayBuffer[SMat], THRESHOLD:Float) {
-  var myPlot2 = semilogx()
+  var errPlot = semilogx()
+  var gradPlot = semilogx()
   var numFeatures:Int = xTraining(0).nrows
   var WEIGHTS:FMat = zeros(numFeatures, 1)
   var ALPHA:Float = 0.0001f //0.0000000001f //good alpha for watching the woodshed test descend
@@ -61,9 +62,9 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
       sumOfBlockAvgError += blockAvgError(X, Y)
     }
     val avgOfSumOfBlockAvgError:Float = sumOfBlockAvgError / xTest.size
-    myPlot2.addPoint(0, iters-1, avgOfSumOfBlockAvgError, true)
-    myPlot2.addPoint(1, iters-1, avgOfL1Gradients, true)
-    println("Iteration: " + iters)
+    errPlot.addPoint(0, iters, avgOfSumOfBlockAvgError, true)
+    gradPlot.addPoint(0, iters, avgOfL1Gradients, true)
+    println("Iteration: " + iters + " Error: " + avgOfSumOfBlockAvgError)
     iters += 1
   }
   def plotROCS():Float = {

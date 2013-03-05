@@ -119,7 +119,7 @@ class classifier(xTraining:ArrayBuffer[SMat], yTraining:ArrayBuffer[SMat], xTest
 
 object run {
   def main() = {
-    val folds = 1
+    val folds = 10
     println("loading data")
     var words: CSMat = load("/scratch/HW2/tokenized.mat", "smap")
     //words = words(0 to 100000, 0)
